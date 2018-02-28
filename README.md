@@ -13,3 +13,17 @@ Ajouter le format OnSave
 ```json
 "editor.formatOnSave": true
 ```
+
+Pour le dev, lancer dans un premier terminal :
+
+```bash
+tsc -w
+```
+
+Puis
+
+```bash
+node app.js
+```
+
+_*TODO: Config du debugger*_
