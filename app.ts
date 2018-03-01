@@ -23,7 +23,7 @@ filenames.forEach(filename => {
 
 //forEach write output
 filenames.forEach(filename => {
-    fs.writeFile('out/' + filename + '.out', {}, function(err) {
+    fs.writeFile('out/' + filename + '.out', {}, function (err) {
         if (err) {
             return console.log(err);
         }
