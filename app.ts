@@ -19,7 +19,16 @@ class Data {
 }
 
 class Ride {
-    constructor(public i?: number, public a?: number, public b?: number, public x?: number, public y?: number, public s?: number, public f?: number) {}
+    constructor(
+        public i?: number,
+        public a?: number,
+        public b?: number,
+        public x?: number,
+        public y?: number,
+        public s?: number,
+        public f?: number,
+        public distance?: number
+    ) {}
 }
 
 class Solution {
@@ -55,11 +64,12 @@ filenames.forEach(filename => {
         ride.i = i;
         ride.a = +line[0];
         ride.b = +line[1];
-        ride.f = +line[2];
-        ride.s = +line[3];
-        ride.x = +line[4];
-        ride.y = +line[5];
+        ride.f = +line[5];
+        ride.s = +line[4];
+        ride.x = +line[2];
+        ride.y = +line[3];
         data.rides.push(ride);
+        ride.distance = calculDistanceByRide(ride);
     }
 
     let solution = new Solution();
@@ -77,7 +87,15 @@ filenames.forEach(filename => {
             let rideDistance = 10000000000000000;
             data.rides.forEach((ride, index) => {
                 let distance = calculDistance(a, b, ride.a, ride.b);
-                if (distance < rideDistance && ridesRidden.indexOf(index) == -1) {
+                let expectedStartTime = time + distance;
+                let expectedTime = time + distance + ride.distance;
+                if (
+                    distance < rideDistance &&
+                    ridesRidden.indexOf(index) == -1 &&
+                    expectedTime < data.T &&
+                    expectedTime < ride.f &&
+                    expectedStartTime > ride.s
+                ) {
                     rideIndex = index;
                     rideDistance = distance;
                 }
@@ -85,7 +103,8 @@ filenames.forEach(filename => {
 
             if (rideIndex != -1) {
                 rideSolution.R.push(rideIndex);
-                time += rideDistance + calculDistanceByRide(data.rides[rideIndex]);
+                time += rideDistance + data.rides[rideIndex].distance;
+
                 a = data.rides[rideIndex].x;
                 b = data.rides[rideIndex].y;
                 ridesRidden.push(rideIndex);
