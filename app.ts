@@ -64,12 +64,37 @@ filenames.forEach(filename => {
 
     let solution = new Solution();
     solution.rides = [];
+    let ridesRidden = [];
 
-    for (let i = 0; i < data.F && i < data.N; i++) {
-        let solutionRide = new RideSolution();
-        solutionRide.M = 1;
-        solutionRide.R = [i];
-        solution.rides.push(solutionRide);
+    for (let i = 0; i < data.F; i++) {
+        let rideSolution = new RideSolution();
+        rideSolution.R = [];
+        let time = 0;
+        let a = 0;
+        let b = 0;
+        while (time < data.T) {
+            let rideIndex = -1;
+            let rideDistance = 10000000000000000;
+            data.rides.forEach((ride, index) => {
+                let distance = calculDistance(a, b, ride.a, ride.b);
+                if (distance < rideDistance && ridesRidden.indexOf(index) == -1) {
+                    rideIndex = index;
+                    rideDistance = distance;
+                }
+            });
+
+            if (rideIndex != -1) {
+                rideSolution.R.push(rideIndex);
+                time += rideDistance + calculDistanceByRide(data.rides[rideIndex]);
+                a = data.rides[rideIndex].x;
+                b = data.rides[rideIndex].y;
+                ridesRidden.push(rideIndex);
+            } else {
+                time = data.T;
+            }
+        }
+
+        solution.rides.push(rideSolution);
     }
 
     fs.writeFile('out/' + filename + '.out', convertSolutionToFile(solution), function(err) {
@@ -81,11 +106,19 @@ filenames.forEach(filename => {
     });
 });
 
+function calculDistance(a: number, b: number, x: number, y: number): number {
+    return Math.abs(a - x) + Math.abs(b - y);
+}
+
+function calculDistanceByRide(ride: Ride): number {
+    return calculDistance(ride.a, ride.b, ride.x, ride.y);
+}
+
 function convertSolutionToFile(solution: Solution): string {
     let output = '';
     if (solution.rides) {
         solution.rides.forEach(ride => {
-            output += ride.M;
+            output += ride.R.length;
             if (ride.R) {
                 ride.R.forEach(r => {
                     output += ' ' + r;
