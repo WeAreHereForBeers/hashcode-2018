@@ -19,7 +19,7 @@ class Data {
 }
 
 class Ride {
-    constructor(public a?: number, public b?: number, public x?: number, public y?: number, public s?: number, public f?: number) {}
+    constructor(public i?: number, public a?: number, public b?: number, public x?: number, public y?: number, public s?: number, public f?: number) {}
 }
 
 class Solution {
@@ -52,6 +52,7 @@ filenames.forEach(filename => {
         let line = lines[1 + i].split(' ');
 
         let ride = new Ride();
+        ride.i = i;
         ride.a = +line[0];
         ride.b = +line[1];
         ride.f = +line[2];
