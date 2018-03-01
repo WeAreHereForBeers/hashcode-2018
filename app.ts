@@ -39,6 +39,10 @@ class RideSolution {
     constructor(public M?: number, public R?: number[]) {}
 }
 
+class Car {
+    constructor(public a?: number, public b?: number, public timeAvailable?: number, public R?: number[]) {}
+}
+
 let filenames = ['a_example.in', 'b_should_be_easy.in', 'c_no_hurry.in', 'd_metropolis.in', 'e_high_bonus.in'];
 
 //forEach file in the folder in
@@ -72,49 +76,46 @@ filenames.forEach(filename => {
         ride.distance = calculDistanceByRide(ride);
     }
 
+    data.rides.sort((a, b) => {
+        return a.s - b.s;
+    });
+
+    let cars: Car[] = [];
+
     let solution = new Solution();
     solution.rides = [];
-    let ridesRidden = [];
 
     for (let i = 0; i < data.F; i++) {
-        let rideSolution = new RideSolution();
-        rideSolution.R = [];
-        let time = 0;
-        let a = 0;
-        let b = 0;
-        while (time < data.T) {
-            let rideIndex = -1;
-            let rideDistance = 10000000000000000;
-            data.rides.forEach((ride, index) => {
-                let distance = calculDistance(a, b, ride.a, ride.b);
-                let expectedStartTime = time + distance;
-                let expectedTime = time + distance + ride.distance;
-                if (
-                    distance < rideDistance &&
-                    ridesRidden.indexOf(index) == -1 &&
-                    expectedTime < data.T &&
-                    expectedTime < ride.f &&
-                    expectedStartTime > ride.s
-                ) {
-                    rideIndex = index;
-                    rideDistance = distance;
-                }
-            });
+        let car = new Car();
+        car.a = 0;
+        car.b = 0;
+        car.timeAvailable = 0;
+        car.R = [];
+        let solutionRide = new RideSolution();
+        solutionRide.R = car.R;
 
-            if (rideIndex != -1) {
-                rideSolution.R.push(rideIndex);
-                time += rideDistance + data.rides[rideIndex].distance;
-
-                a = data.rides[rideIndex].x;
-                b = data.rides[rideIndex].y;
-                ridesRidden.push(rideIndex);
-            } else {
-                time = data.T;
-            }
-        }
-
-        solution.rides.push(rideSolution);
+        solution.rides.push(solutionRide);
+        cars.push(car);
     }
+
+    data.rides.forEach((ride, index) => {
+        let maxTimeDistance = data.T;
+        let selectedCar: Car = null;
+        cars.forEach(car => {
+            let startTimeOfRide = Math.max(car.timeAvailable + calculDistanceCarToRide(car, ride), ride.s);
+            if (startTimeOfRide < maxTimeDistance && car.timeAvailable + calculDistanceCarToRide(car, ride) + ride.distance < data.T) {
+                selectedCar = car;
+                maxTimeDistance = startTimeOfRide;
+            }
+        });
+
+        if (selectedCar) {
+            selectedCar.R.push(ride.i);
+            selectedCar.timeAvailable += calculDistanceCarToRide(selectedCar, ride) + ride.distance;
+            selectedCar.a = ride.x;
+            selectedCar.b = ride.y;
+        }
+    });
 
     fs.writeFile('out/' + filename + '.out', convertSolutionToFile(solution), function(err) {
         if (err) {
@@ -127,6 +128,10 @@ filenames.forEach(filename => {
 
 function calculDistance(a: number, b: number, x: number, y: number): number {
     return Math.abs(a - x) + Math.abs(b - y);
+}
+
+function calculDistanceCarToRide(car: Car, ride: Ride) {
+    return calculDistance(car.a, car.b, ride.a, ride.b);
 }
 
 function calculDistanceByRide(ride: Ride): number {
