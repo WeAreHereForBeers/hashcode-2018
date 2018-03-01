@@ -19,7 +19,16 @@ class Data {
 }
 
 class Ride {
-    constructor(public i: number, public a?: number, public b?: number, public x?: number, public y?: number, public s?: number, public f?: number) {}
+    constructor(
+        public i: number,
+        public a?: number,
+        public b?: number,
+        public x?: number,
+        public y?: number,
+        public s?: number,
+        public f?: number,
+        public usedByCar: boolean = false
+    ) {}
 }
 
 class Solution {
@@ -31,7 +40,7 @@ class RideSolution {
 }
 
 class Car {
-    constructor(public i: number, public rideI: number = -1) {}
+    constructor(public i: number, public rideI: number = -1, public state: boolean = false) {}
 }
 
 let filenames = ['a_example.in', 'b_should_be_easy.in', 'c_no_hurry.in', 'd_metropolis.in', 'e_high_bonus.in'];
@@ -60,25 +69,42 @@ filenames.forEach(filename => {
         let ride = new Ride(i);
         ride.a = +line[0];
         ride.b = +line[1];
-        ride.f = +line[2];
-        ride.s = +line[3];
-        ride.x = +line[4];
-        ride.y = +line[5];
+        ride.f = +line[5];
+        ride.s = +line[4];
+        ride.x = +line[2];
+        ride.y = +line[3];
         data.rides.push(ride);
     }
 
     let solution = new Solution();
     solution.rides = [];
 
-    for (let i = 0; i < data.F && i < data.N; i++) {
-        let solutionRide = new RideSolution();
-        solutionRide.M = 1;
-        solutionRide.R = [i];
-        solution.rides.push(solutionRide);
+    for (let i = 0; i < data.F; i++) {
+        cars[i] = new Car(i);
     }
 
-    for(let i = 0; i < data.F; i++) {
-        cars[i] = new Car(i);
+    for (let t = 0; t < data.T; t++) {
+        cars.forEach((car: Car) => {
+            if (car.rideI < 0) {
+                let minT = 9999,
+                    currentRide: Ride;
+                data.rides.forEach(ride => {
+                    if (!ride.usedByCar && ride.s < minT) {
+                        currentRide = ride;
+                    }
+                });
+
+                if (currentRide) {
+                    car.rideI = currentRide.i;
+                    currentRide.usedByCar = true;
+
+                    let solutionRide = new RideSolution();
+                    solutionRide.M = 1;
+                    solutionRide.R = [currentRide.i];
+                    solution.rides.push(solutionRide);
+                }
+            }
+        });
     }
 
     fs.writeFile('out/' + filename + '.out', convertSolutionToFile(solution), function(err) {
