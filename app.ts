@@ -22,6 +22,14 @@ class Ride {
     constructor(public a?: number, public b?: number, public x?: number, public y?: number, public s?: number, public f?: number) {}
 }
 
+class Solution {
+    constructor(public rides?: RideSolution[]) {}
+}
+
+class RideSolution {
+    constructor(public M?: number, public R?: number[]) {}
+}
+
 let filenames = ['a_example.in', 'b_should_be_easy.in', 'c_no_hurry.in', 'd_metropolis.in', 'e_high_bonus.in'];
 
 //forEach file in the folder in
@@ -52,15 +60,41 @@ filenames.forEach(filename => {
         ride.y = +line[5];
         data.rides.push(ride);
     }
-});
 
-//forEach write output
-/* filenames.forEach(filename => {
-    fs.writeFile('out/' + filename + '.out', {}, function(err) {
+    let solution = new Solution();
+    solution.rides = [];
+
+    for (let i = 0; i < data.F && i < data.N; i++) {
+        let solutionRide = new RideSolution();
+        solutionRide.M = 1;
+        solutionRide.R = [i];
+        solution.rides.push(solutionRide);
+    }
+
+    fs.writeFile('out/' + filename + '.out', convertSolutionToFile(solution), function(err) {
         if (err) {
             return console.log(err);
         }
 
         console.log('The file was saved!');
     });
-}); */
+});
+
+function convertSolutionToFile(solution: Solution): string {
+    let output = '';
+    if (solution.rides) {
+        solution.rides.forEach(ride => {
+            output += ride.M;
+            if (ride.R) {
+                ride.R.forEach(r => {
+                    output += ' ' + r;
+                });
+            }
+            output += '\n';
+        });
+    }
+    return output;
+}
+
+//forEach write output
+filenames.forEach(filename => {});
